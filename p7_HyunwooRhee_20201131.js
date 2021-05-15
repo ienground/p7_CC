@@ -143,6 +143,11 @@ function draw() {
     }
 
     for (let i = 0; i < secretPointerX.length; i++) {
+        if (dist(secretPointerX[i], secretPointerY[i], secretPointerCenterX[i], secretPointerCenterY[i]) >= spread) {
+            secretPointerX[i] = secretPointerCenterX[i];
+            secretPointerY[i] = secretPointerCenterY[i];
+        }
+
         let distance = dist(mouseX, mouseY, secretPointerX[i], secretPointerY[i]);
 
         if (!isUVLightOff) {
@@ -166,6 +171,11 @@ function draw() {
     }
 
     for (let i = 0; i < timePointerX.length; i++) {
+        if (dist(timePointerX[i], timePointerY[i], timePointerCenterX[i], timePointerCenterY[i]) >= spread) {
+            timePointerX[i] = timePointerCenterX[i];
+            timePointerY[i] = timePointerCenterY[i];
+        }
+
         fill(timePointerColor[i]);
         let size = map(frameCount - timePointerMade[i], 0, duration, timePointerSize[i], 0);
         circle(timePointerX[i], timePointerY[i], size);
