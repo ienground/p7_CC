@@ -21,32 +21,25 @@ let pointerCenterY = [];
 let pointerSize = [];
 let pointerColor = [];
 
-// secret brush
-let secretPointerX = [];
-let secretPointerY = [];
-let secretPointerCenterX = [];
-let secretPointerCenterY = [];
-let secretPointerSize = [];
-let secretPointerColor = [];
+// // secret brush
+// let secretPointerX = [];
+// let secretPointerY = [];
+// let secretPointerCenterX = [];
+// let secretPointerCenterY = [];
+// let secretPointerSize = [];
+// let secretPointerColor = [];
 
-// time brush
-let timePointerX = [];
-let timePointerY = [];
-let timePointerCenterX = [];
-let timePointerCenterY = [];
-let timePointerSize = [];
-let timePointerMade = [];
-let timePointerColor = [];
-
-let spread = 15;
-let duration = 3 * 60;
-let clickStartTime = 0, clickEndTime = 0;
+let centerX, centerY;
+let radius = 20;
+let distance = 100;
+// let angle = 0;
 
 // ui
 let colorPicker;
 let timeOutSlider, spreadSlider;
 let isUVLightOff = true;
 let lightToggleLevel = 26;
+let px = [], py = [];
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
@@ -63,144 +56,32 @@ function setup() {
 
     spreadSlider = createSlider(1, 50, 10);
     spreadSlider.position(width - 160 - spreadSlider.width, height - 40);
+
+    centerX = width / 2;
+    centerY = (height - 100) / 2;
+    radius = 20;
 }
 
 function draw() {
-    if (isUVLightOff) {
-        background('#FFFFFF');
-    } else {
-        background('#d2a8e8')
-    }
+    background(255);
+
     noStroke();
+    fill('#FF0000');
+    circle(centerX, centerY, radius);
 
-    brushColor = colorPicker.value();
-    duration = timeOutSlider.value() * 60;
-    spread = spreadSlider.value();
+    fill('#000000');
+    circle(centerX + distance * cos(frameCount % 360), centerY + distance * sin(frameCount % 360), radius);
 
-    if (brush === 1 && isUVLightOff) {
-        createSecretLight();
+    noFill();
+    stroke('#000000');
+    line(centerX, centerY, centerX + distance * cos(frameCount % 360), centerY + distance * sin(frameCount % 360));
+
+    for (let i = 0; i < px.length - 1; i++) {
+        strokeWeight(radius * 2);
+        line(px[i], py[i], px[i + 1], py[i + 1]);
     }
 
-    if (mouseIsPressed) {
-        for (let i = 0; i < 8; i++) {
-            switch (brush) {
-                case 0: {
-                    pointerX.push(mouseX);
-                    pointerY.push(mouseY);
-                    pointerCenterX.push(mouseX);
-                    pointerCenterY.push(mouseY);
-                    pointerSize.push(brushSize);
-                    pointerColor.push(brushColor);
-                    break;
-                }
-
-                case 1: {
-                    secretPointerX.push(mouseX);
-                    secretPointerY.push(mouseY);
-                    secretPointerCenterX.push(mouseX);
-                    secretPointerCenterY.push(mouseY);
-                    secretPointerSize.push(brushSize);
-                    secretPointerColor.push(brushColor);
-                    break;
-                }
-
-                case 2: {
-                    timePointerX.push(mouseX);
-                    timePointerY.push(mouseY);
-                    timePointerCenterX.push(mouseX);
-                    timePointerCenterY.push(mouseY);
-                    timePointerSize.push(brushSize);
-                    timePointerColor.push(brushColor);
-                    timePointerMade.push(frameCount);
-                    break;
-                }
-            }
-
-        }
-    }
-
-    for (let i = 0; i < pointerX.length; i++) {
-        if (dist(pointerX[i], pointerY[i], pointerCenterX[i], pointerCenterY[i]) >= spread) {
-            pointerX[i] = pointerCenterX[i];
-            pointerY[i] = pointerCenterY[i];
-        }
-
-        fill(pointerColor[i]);
-        circle(pointerX[i], pointerY[i], pointerSize[i]);
-
-        let x_add = random(-1, 1);
-        let y_add = random(-1, 1);
-        pointerX[i] += x_add;
-        pointerY[i] += y_add;
-
-        if (dist(pointerX[i], pointerY[i], pointerCenterX[i], pointerCenterY[i]) >= spread) {
-            pointerX[i] -= x_add;
-            pointerY[i] -= y_add;
-        }
-    }
-
-    for (let i = 0; i < secretPointerX.length; i++) {
-        if (dist(secretPointerX[i], secretPointerY[i], secretPointerCenterX[i], secretPointerCenterY[i]) >= spread) {
-            secretPointerX[i] = secretPointerCenterX[i];
-            secretPointerY[i] = secretPointerCenterY[i];
-        }
-
-        let distance = dist(mouseX, mouseY, secretPointerX[i], secretPointerY[i]);
-
-        if (!isUVLightOff) {
-            fill(secretPointerColor[i]);
-            circle(secretPointerX[i], secretPointerY[i], secretPointerSize[i]);
-        } else if (distance <= 50 && brush === 1) {
-            let secretLightDimColor = lerpColor(color('#FFFFFF'), color(secretPointerColor[i]), 1 - distance / 50);
-            fill(secretLightDimColor);
-            circle(secretPointerX[i], secretPointerY[i], secretPointerSize[i]);
-        }
-
-        let x_add = random(-1, 1);
-        let y_add = random(-1, 1);
-        secretPointerX[i] += x_add;
-        secretPointerY[i] += y_add;
-
-        if (dist(secretPointerX[i], secretPointerY[i], secretPointerCenterX[i], secretPointerCenterY[i]) >= spread) {
-            secretPointerX[i] -= x_add;
-            secretPointerY[i] -= y_add;
-        }
-    }
-
-    for (let i = 0; i < timePointerX.length; i++) {
-        if (dist(timePointerX[i], timePointerY[i], timePointerCenterX[i], timePointerCenterY[i]) >= spread) {
-            timePointerX[i] = timePointerCenterX[i];
-            timePointerY[i] = timePointerCenterY[i];
-        }
-
-        fill(timePointerColor[i]);
-        let size = map(frameCount - timePointerMade[i], 0, duration, timePointerSize[i], 0);
-        circle(timePointerX[i], timePointerY[i], size);
-
-        let x_add = random(-1, 1);
-        let y_add = random(-1, 1);
-        timePointerX[i] += x_add;
-        timePointerY[i] += y_add;
-
-        if (dist(timePointerX[i], timePointerY[i], timePointerCenterX[i], timePointerCenterY[i]) >= spread) {
-            timePointerX[i] -= x_add;
-            timePointerY[i] -= y_add;
-        }
-    }
-
-    for (let i = timePointerX.length - 1; i >= 0; i--) {
-        if (frameCount - timePointerMade[i] >= duration) {
-            timePointerX.splice(i, 1);
-            timePointerY.splice(i, 1);
-            timePointerCenterX.splice(i, 1);
-            timePointerCenterY.splice(i, 1);
-            timePointerSize.splice(i, 1);
-            timePointerColor.splice(i, 1);
-            timePointerMade.splice(i, 1);
-        }
-    }
-
-    createCursor();
+    // createCursor();
     createUI();
 }
 
@@ -404,6 +285,16 @@ function keyPressed(key) {
             timePointerSize = [];
             timePointerMade = [];
             timePointerColor = [];
+            break;
+        }
+
+        case ' ': {
+            strokeWeight(radius * 2);
+            px.push(centerX + distance * cos(frameCount % 360));
+            py.push(centerY + distance * sin(frameCount % 360));
+
+            centerX += distance * cos(frameCount % 360);
+            centerY += distance * sin(frameCount % 360);
             break;
         }
     }
